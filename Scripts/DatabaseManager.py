@@ -14,7 +14,7 @@ class DatabaseManager:
         self.__cursor = self.__connection.cursor()
 
     def getAllTasks(self):
-        myQuery = "SELECT Id,Name,Status,Deadline,Priority,Description FROM Task"
+        myQuery = "SELECT Id,Name,Status,Deadline,Priority,Description,PersonId FROM Task"
         self.__cursor.execute(myQuery)
 
         rijen = self.__cursor.fetchall()
@@ -137,6 +137,17 @@ class DatabaseManager:
             self.__cursor.execute(myQuery, task_data)
             self.__connection.commit()
 
+    def updateTaskPerson(self, taskId, personId):
+        if self.doesTaskExist(taskId) and self.doesPersonExist(personId):
+            dbtask = self.getTaskById(taskId)
+            task = Task(dbtask[1], dbtask[2], dbtask[3], dbtask[4], dbtask[5])
+
+            myQuery = "UPDATE Task SET PersonId=? WHERE Id=?;"
+            task_data = (personId, taskId)
+            self.__cursor.execute(myQuery, task_data)
+            self.__connection.commit()
+        else:
+            print("PersonId or TaskId does not exist")
     def exportToExcel(self):
         query1 = "SELECT * FROM Task;"
         query2 = "SELECT * FROM Person"

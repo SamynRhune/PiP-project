@@ -11,7 +11,7 @@ class CommandoHandler:
         self.__add = ["TASK", "PERSON"]
         self.__remove = ["TASK", "PERSON"]
         self.__update = ["TASK"]
-        self.__updateTask = ["STATUS", "DEADLINE", "PRIORITY"]
+        self.__updateTask = ["STATUS", "DEADLINE", "PRIORITY", "PERSON"]
         self.__get = ["TASK", "PERSON"]
         self.__dbManager = DatabaseManager()
 
@@ -111,7 +111,7 @@ class CommandoHandler:
         # TASK
         if commandlist[1] == self.__update[0]:
             if len(commandlist) == 2:
-                commandlist.append(input("Wat wil je updaten STATUS of DEADLINE of PRIORITY\n").upper())
+                commandlist.append(input("Wat wil je updaten STATUS of DEADLINE of PRIORITY of PERSON\n").upper())
             self.updateTaskCommand(commandlist);
         else:
             print("")
@@ -145,6 +145,19 @@ class CommandoHandler:
             id = input("Geef het id van de taak die je wil updaten:\n")
             deadline = input("Geef een prioriteit van 0 tot 10\n")
             self.__dbManager.updateTaskPriority(id, deadline)
+
+        #Person
+        elif commandlist[2] == self.__updateTask[3]:
+            print("\n------------------\nALLE TAKEN\n------------------")
+            self.__dbManager.getAllTasks()
+            print("\n------------------\nALLE PERSONEN\n------------------")
+            self.__dbManager.getAllPeople()
+            print("\n------------------\nUPDATEN VAN TASK\n------------------")
+            taskId = input("Geef een taskId\n")
+            personId = input("Geef een personId\n")
+            self.__dbManager.updateTaskPerson(taskId, personId)
+
+
 
     def getCommand(self, commandlist):
         # TASK
