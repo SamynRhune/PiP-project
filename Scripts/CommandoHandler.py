@@ -2,6 +2,7 @@ from Task import Task
 from TaskStatus import TaskStatus
 from Person import Person
 from DatabaseManager import DatabaseManager
+from DateChecker import DateChecker
 
 
 class CommandoHandler:
@@ -24,29 +25,45 @@ class CommandoHandler:
             print("Ongeldig commando typ HELP om alle mogelijke commando's te bekijken")
 
     def eenCommand(self, commandlist):
-        # TODO string automatisch laten genereren
+
         # ADD
         if commandlist[0] == self.__firstLineCommands[0]:
             if len(commandlist) == 1:
-                commandlist.append(input("Wat wil je toevoegen TASK of PERSON\n").upper())
+                options = ""
+                for item in self.__add:
+                    options += item + " of "
+                options = options[:-3]
+                commandlist.append(input("Wat wil je toevoegen " + options + "\n").upper())
             self.addCommand(commandlist)
 
         # REMOVE
         elif commandlist[0] == self.__firstLineCommands[1]:
             if len(commandlist) == 1:
-                commandlist.append(input("Wat wil je verwijderen TASK of PERSON\n").upper())
+                options = ""
+                for item in self.__remove:
+                    options += item + " of "
+                options = options[:-3]
+                commandlist.append(input("Wat wil je verwijderen " + options + "\n").upper())
             self.removeCommand(commandlist)
 
         # UPDATE
         elif commandlist[0] == self.__firstLineCommands[2]:
             if len(commandlist) == 1:
-                commandlist.append(input("Wat wil je updaten TASK\n").upper())
+                options = ""
+                for item in self.__update:
+                    options += item + " of "
+                options = options[:-3]
+                commandlist.append(input("Wat wil je updaten " + options + "\n").upper())
             self.updateCommand(commandlist)
 
         # GET
         elif commandlist[0] == self.__firstLineCommands[3]:
             if len(commandlist) == 1:
-                commandlist.append(input("Wat wil je bekijken TASK of PERSON\n").upper())
+                options = ""
+                for item in self.__get:
+                    options += item + " of "
+                options = options[:-3]
+                commandlist.append(input("Wat wil je bekijken " + options + "\n").upper())
             self.getCommand(commandlist)
 
         # HELP
@@ -60,15 +77,17 @@ class CommandoHandler:
             self.__dbManager.exportToExcel()
 
         # EXIT
-        else:
+        elif commandlist[0] == self.__firstLineCommands[6]:
             # Laten doorgaan voor main want deze is exit
-            print("Nog toevoegen")
+            self.__dbManager.closeConnectionDb()
+        else:
+            print("Je hebt een verkeerd commando ingegeven typ help om alle commando's te krijgen.")
 
     def addCommand(self, commandlist):
         # TAAK
         if commandlist[1] == self.__add[0]:
             print("\n------------------\nTOEVOEGEN VAN TAAK\n------------------")
-            name = input("Geef de naam van de taak:\n ")
+            name = input("Geef de naam van de taak:\n")
             description = input("Geef beschrijving van de taak:\n")
 
             taak = Task(name, TaskStatus.TODO, "No deadline", 5, description)
@@ -79,10 +98,14 @@ class CommandoHandler:
         # PERSON
         elif commandlist[1] == self.__add[1]:
             print("\n------------------\nTOEVOEGEN VAN PERSOON\n------------------")
-            name = input("Geef de naam van de persson:\n")
-            birthday = input("Geef geboortedag van de taak (DD-MM-YYYY):\n")
+            name = input("Geef de naam van de persoon:\n")
 
-            person = Person(name, birthday)
+            birthday = DateChecker("")
+            while not birthday.checkValid():
+                bday = input("Geef geboortedag van de persoon (DD-MM-YYYY):\n")
+                birthday = DateChecker(bday)
+
+            person = Person(name, birthday.getDate())
             self.__dbManager.addPerson(person)
 
             print("Toevoegen persoon gelukt\n")
@@ -93,68 +116,76 @@ class CommandoHandler:
     def removeCommand(self, commandlist):
         # TASK
         if commandlist[1] == self.__remove[0]:
-            print("\n------------------\nALLE TAKEN\n------------------")
-            self.__dbManager.getAllTasks()
-            print("\n------------------\nVERWIJDEREN VAN TASK\n------------------")
-            id = input("Geef het id van de taak die je wil verwijderen:\n")
+            print("\nTaak verwijderen ...\n")
+            id = self.getIdFromTaskToUpdate()
             self.__dbManager.removeTask(id)
 
         # PERSON
         elif commandlist[1] == self.__remove[1]:
-            print("\n------------------\nALLE PERSONEN\n------------------")
-            self.__dbManager.getAllPeople()
-            print("\n------------------\nVERWIJDEREN VAN PERSOON\n------------------")
-            id = input("Geef het id van de persoon die je wil verwijderen:\n")
+            print("\nPersoon verwijderen ...\n")
+            id = self.getIdFromPersonToUpdate()
             self.__dbManager.removePerson(id)
 
     def updateCommand(self, commandlist):
         # TASK
         if commandlist[1] == self.__update[0]:
             if len(commandlist) == 2:
-                commandlist.append(input("Wat wil je updaten STATUS of DEADLINE of PRIORITY of PERSON\n").upper())
+                options = ""
+                for item in self.__updateTask:
+                    options += item + " of "
+                options = options[:-3]
+                commandlist.append(input("Wat wil je updaten " + options +  "\n").upper())
             self.updateTaskCommand(commandlist);
         else:
             print("")
             # Ruimte voor uitbreidbaarheid
 
+    def getIdFromTaskToUpdate(self):
+        print("\n------------------\nALLE TAKEN\n------------------")
+        self.__dbManager.getAllTasks()
+        print("\n------------------\nAANPASSEN VAN TASK\n------------------")
+        id = input("Geef het id van de taak die je wil aanpassen:\n")
+        return id
+
+    def getIdFromPersonToUpdate(self):
+        print("\n------------------\nALLE PERSONEN\n------------------")
+        self.__dbManager.getAllPeople()
+        print("\n------------------\nAANPASSEN VAN PERSOON\n------------------")
+        id = input("Geef het id van de persoon die je wil aanpassen:\n")
+        return id
+
     def updateTaskCommand(self, commandlist):
-        # TODO Alles in een dezelfde command zetten teveel herhaling
+
         # Status
+        print("\nStatus updaten ...\n")
         if commandlist[2] == self.__updateTask[0]:
-            print("\n------------------\nALLE TAKEN\n------------------")
-            self.__dbManager.getAllTasks()
-            print("\n------------------\nUPDATEN VAN TASK\n------------------")
-            id = input("Geef het id van de taak die je wil updaten:\n")
+            id = self.getIdFromTaskToUpdate()
             self.__dbManager.setNextStatusTask(id);
 
         # Deadline
         elif commandlist[2] == self.__updateTask[1]:
-            print("\n------------------\nALLE TAKEN\n------------------")
-            self.__dbManager.getAllTasks()
-            print("\n------------------\nUPDATEN VAN TASK\n------------------")
-            id = input("Geef het id van de taak die je wil updaten:\n")
-            deadline = input("Geef een Deadline in de vorm DD-MM-YYYY\n")
+            print("\nDeadline updaten ...\n")
+            id = self.getIdFromTaskToUpdate()
+            deadline = DateChecker("")
+            while not deadline.checkValid():
+                date = input("Geef een Deadline in de vorm DD-MM-YYYY\n")
+                deadline = DateChecker(date)
 
-            self.__dbManager.updateTaskDeadline(id, deadline)
+            self.__dbManager.updateTaskDeadline(id, deadline.getDate())
 
         # Priority
         elif commandlist[2] == self.__updateTask[2]:
-            print("\n------------------\nALLE TAKEN\n------------------")
-            self.__dbManager.getAllTasks()
-            print("\n------------------\nUPDATEN VAN TASK\n------------------")
-            id = input("Geef het id van de taak die je wil updaten:\n")
+            print("\nPriority updaten ...\n")
+            id = self.getIdFromTaskToUpdate()
             deadline = input("Geef een prioriteit van 0 tot 10\n")
             self.__dbManager.updateTaskPriority(id, deadline)
 
         #Person
         elif commandlist[2] == self.__updateTask[3]:
-            print("\n------------------\nALLE TAKEN\n------------------")
-            self.__dbManager.getAllTasks()
-            print("\n------------------\nALLE PERSONEN\n------------------")
-            self.__dbManager.getAllPeople()
-            print("\n------------------\nUPDATEN VAN TASK\n------------------")
-            taskId = input("Geef een taskId\n")
-            personId = input("Geef een personId\n")
+            print("\nPersoon toewijzen ...\n")
+            taskId = self.getIdFromTaskToUpdate()
+            personId = self.getIdFromPersonToUpdate()
+
             self.__dbManager.updateTaskPerson(taskId, personId)
 
 

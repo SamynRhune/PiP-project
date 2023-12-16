@@ -19,8 +19,7 @@ class DatabaseManager:
 
         rijen = self.__cursor.fetchall()
 
-        print("All Tasks")
-        print("------------------------")
+
         for rij in rijen:
             print(rij)
 
@@ -30,8 +29,7 @@ class DatabaseManager:
 
         rijen = self.__cursor.fetchall()
 
-        print("All People")
-        print("------------------------")
+
         for rij in rijen:
             print(rij)
 
@@ -56,8 +54,12 @@ class DatabaseManager:
         else:
             myQuery = "INSERT INTO Person (Name,Birthday) VALUES (?,?);"
             person_data = (person.getName(), person.getBirthday())
-            self.__cursor.execute(myQuery, person_data)
-            self.__connection.commit()
+            try:
+                self.__cursor.execute(myQuery, person_data)
+                self.__connection.commit()
+            except sqlite3.Error as e:
+                print(f"Fout bij het toevoegen van persoon: {e}")
+                self.__connection.rollback()
 
     def removeTask(self, id):
         if self.doesTaskExist(id):
@@ -127,8 +129,6 @@ class DatabaseManager:
     def updateTaskDeadline(self, id, new_deadline):
         if self.doesTaskExist(id):
 
-            #TODO check if deadline is date
-
             dbtask = self.getTaskById(id)
             task = Task(dbtask[1], dbtask[2], dbtask[3], dbtask[4], dbtask[5])
 
@@ -153,8 +153,6 @@ class DatabaseManager:
         query2 = "SELECT * FROM Person"
         try:
             Tasks = pd.read_sql_query(query1, self.__connection)
-
-
             People = pd.read_sql_query(query2, self.__connection)
 
             excelfile = "output.xlsx"
@@ -166,6 +164,9 @@ class DatabaseManager:
             print("Gegevens succesvol geëxporteerd naar 'output.xlsx'")
         except Exception as e:
             print(f"Fout bij het exporteren naar Excel: {e}")
+    def closeConnectionDb(self):
+        self.__connection.close()
+        print("Connectie met database gesloten")
 
 
 
