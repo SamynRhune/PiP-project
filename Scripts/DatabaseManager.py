@@ -19,19 +19,149 @@ class DatabaseManager:
 
         rijen = self.__cursor.fetchall()
 
+        print("---------------------")
+        print("ALLE TAKEN")
+        print("---------------------")
 
-        for rij in rijen:
-            print(rij)
+        df = pd.DataFrame(rijen, columns=['ID', 'Name', 'Status', 'Deadline', 'Priority', 'Description', 'PersonId'])
+
+        df = df.fillna('None')
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.max_rows', None)
+        print(df.to_string(index=False))
+
+
 
     def getAllPeople(self):
         myQuery = "SELECT Id,Name,Birthday FROM Person"
         self.__cursor.execute(myQuery)
 
         rijen = self.__cursor.fetchall()
+        print("---------------------")
+        print("ALLE PERSONEN")
+        print("---------------------")
 
+        df = pd.DataFrame(rijen, columns=["Id","Name","Birthday"])
 
-        for rij in rijen:
-            print(rij)
+        df = df.fillna('None')
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.max_rows', None)
+        print(df.to_string(index=False))
+
+    def getAllTasksWithPerson(self):
+
+        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, Person.Name, Person.Birthday FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id;"
+
+        self.__cursor.execute(myQuery)
+
+        rijen = self.__cursor.fetchall()
+
+        print("---------------------")
+        print("ALLE TAKEN")
+        print("---------------------")
+
+        df = pd.DataFrame(rijen,
+        columns=['ID', 'Name', 'Status', 'Deadline', 'Priority', 'Description', 'PersonName','PersonBirthday'])
+
+        df = df.fillna('None')
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.max_rows', None)
+        print(df.to_string(index=False))
+
+    def getAllPeopleWithCountTask(self):
+        myQuery = "SELECT Person.Id AS Id, Person.Name AS Name,Person.Birthday AS Birthday, COUNT(Task.Id) AS TaskCount FROM Person LEFT JOIN Task ON Person.Id = Task.PersonId GROUP BY Person.Id, Person.Name;"
+        self.__cursor.execute(myQuery)
+
+        rijen = self.__cursor.fetchall()
+        print("---------------------")
+        print("ALLE PERSONEN")
+        print("---------------------")
+
+        df = pd.DataFrame(rijen, columns=["Id","Name","Birthday","TaskCount"])
+
+        df = df.fillna('None')
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.max_rows', None)
+        print(df.to_string(index=False))
+
+    def getAllTasksTodo(self):
+
+        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status = 'TODO';"
+
+        self.__cursor.execute(myQuery)
+
+        rijen = self.__cursor.fetchall()
+
+        print("---------------------")
+        print("ALLE TAKEN")
+        print("---------------------")
+
+        df = pd.DataFrame(rijen,
+        columns=['ID', 'Name', 'Status', 'Deadline', 'Priority', 'Description', 'PersonId'])
+
+        df = df.fillna('None')
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.max_rows', None)
+        print(df.to_string(index=False))
+
+    def getAllTasksProgress(self):
+
+        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status = 'IN_PROGRESS';"
+
+        self.__cursor.execute(myQuery)
+
+        rijen = self.__cursor.fetchall()
+
+        print("---------------------")
+        print("ALLE TAKEN")
+        print("---------------------")
+
+        df = pd.DataFrame(rijen,
+        columns=['ID', 'Name', 'Status', 'Deadline', 'Priority', 'Description', 'PersonId'])
+
+        df = df.fillna('None')
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.max_rows', None)
+        print(df.to_string(index=False))
+
+    def getAllTasksFinished(self):
+        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status = 'FINISHED';"
+
+        self.__cursor.execute(myQuery)
+
+        rijen = self.__cursor.fetchall()
+
+        print("---------------------")
+        print("ALLE TAKEN")
+        print("---------------------")
+
+        df = pd.DataFrame(rijen,
+                          columns=['ID', 'Name', 'Status', 'Deadline', 'Priority', 'Description', 'PersonId'])
+
+        df = df.fillna('None')
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.max_rows', None)
+        print(df.to_string(index=False))
+
+    def getAllTasksNotFinished(self):
+        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status != 'FINISHED';"
+
+        self.__cursor.execute(myQuery)
+
+        rijen = self.__cursor.fetchall()
+
+        print("---------------------")
+        print("ALLE TAKEN")
+        print("---------------------")
+
+        df = pd.DataFrame(rijen,
+                          columns=['ID', 'Name', 'Status', 'Deadline', 'Priority', 'Description', 'PersonId'])
+
+        df = df.fillna('None')
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.max_rows', None)
+        print(df.to_string(index=False))
+
 
     def addTask(self, task):
         if not isinstance(task, Task):
@@ -109,8 +239,13 @@ class DatabaseManager:
     def setNextStatusTask(self, id):
         if self.doesTaskExist(id):
             dbtaak = self.getTaskById(id)
-            taak = Task(dbtaak[1], dbtaak[2], dbtaak[3], dbtaak[4], dbtaak[5])
+            if dbtaak[2] == "IN_PROGRESS":
+                taak = Task(dbtaak[1], TaskStatus.IN_PROGRESS, dbtaak[3], dbtaak[4], dbtaak[5])
+            else:
+                taak = Task(dbtaak[1], dbtaak[2], dbtaak[3], dbtaak[4], dbtaak[5])
+
             taak.set_next_status()
+            print(taak.get_status())
 
             myQuery = "UPDATE Task SET Status = ? WHERE Id = ?;"
             self.__cursor.execute(myQuery, (taak.get_status().name, id))

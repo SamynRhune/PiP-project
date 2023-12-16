@@ -13,7 +13,7 @@ class CommandoHandler:
         self.__remove = ["TASK", "PERSON"]
         self.__update = ["TASK"]
         self.__updateTask = ["STATUS", "DEADLINE", "PRIORITY", "PERSON"]
-        self.__get = ["TASK", "PERSON"]
+        self.__get = ["ALLTASK", "ALLPERSON","TASKWITHPERSON","PERSONTASKCOUNT","TASKTODO","TASKINPROGRESS","TASKFINISHED","TASKNOTFINISHED"]
         self.__dbManager = DatabaseManager()
 
     def inputCommand(self, command):
@@ -63,7 +63,7 @@ class CommandoHandler:
                 for item in self.__get:
                     options += item + " of "
                 options = options[:-3]
-                commandlist.append(input("Wat wil je bekijken " + options + "\n").upper())
+                commandlist.append(input("Wat wil je bekijken \n" + options + "\n").upper())
             self.getCommand(commandlist)
 
         # HELP
@@ -191,12 +191,37 @@ class CommandoHandler:
 
 
     def getCommand(self, commandlist):
-        # TASK
+        # ALLTASK
         if commandlist[1] == self.__get[0]:
             self.__dbManager.getAllTasks()
             print("\n")
 
-        # PERSON
+        # ALLPERSON
         elif commandlist[1] == self.__get[1]:
             self.__dbManager.getAllPeople()
+            print("\n")
+
+        #TASKWITHPERSON
+        elif commandlist[1] == self.__get[2]:
+            self.__dbManager.getAllTasksWithPerson()
+            print("\n")
+        #PERSONWITHCOUNTTASK
+        elif commandlist[1] == self.__get[3]:
+            self.__dbManager.getAllPeopleWithCountTask()
+            print("\n")
+        #TASKSTODO
+        elif commandlist[1] == self.__get[4]:
+            self.__dbManager.getAllTasksTodo()
+            print("\n")
+        #TASKSINPROGRESS
+        elif commandlist[1] == self.__get[5]:
+            self.__dbManager.getAllTasksProgress()
+            print("\n")
+        #TASKSFINISHED
+        elif commandlist[1] == self.__get[6]:
+            self.__dbManager.getAllTasksFinished()
+            print("\n")
+        #TASKSNOTFINISHED
+        elif commandlist[1] == self.__get[7]:
+            self.__dbManager.getAllTasksNotFinished()
             print("\n")

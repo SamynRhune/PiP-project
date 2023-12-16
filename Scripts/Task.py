@@ -48,4 +48,10 @@ class Task:
     def set_personId(self,id):
         self.__personId = id
 
-
+if __name__ == '__main__':
+    taak1 = Task("Taak1","","",5,"")
+    print(taak1.get_status())
+    taak1.set_next_status()
+    print(taak1.get_status())
+    taak1.set_next_status()
+    print(taak1.get_status())
