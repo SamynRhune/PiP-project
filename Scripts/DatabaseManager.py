@@ -8,10 +8,45 @@ import os
 
 class DatabaseManager:
     def __init__(self):
+
         current_directory = os.path.dirname(os.path.abspath(__file__))
-        db_path = os.path.join(current_directory, "..", "Databases", "TaskDatabase.db")
-        self.__connection = sqlite3.connect(db_path)
+        database_directory = os.path.join(current_directory,"..","Databases")
+
+        #Databasedirectory aanmaken
+        if not os.path.exists(database_directory):
+            os.makedirs(database_directory)
+
+        #connectie opzetten
+        database_path = os.path.join(database_directory,"TaskDatabase.db")
+        self.__connection = sqlite3.connect(database_path)
         self.__cursor = self.__connection.cursor()
+
+        #controleren of tabellen al bestaan
+        self.__cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='Person'")
+        person_exists = self.__cursor.fetchone()
+        if not person_exists:
+            self.__cursor.execute('''CREATE TABLE "Person" (
+	            "Id"	INTEGER,
+	            "Name"	TEXT UNIQUE,
+	            "Birthday"	TEXT,
+	            PRIMARY KEY("Id")
+                )''')
+            self.__connection.commit()
+
+        self.__cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='Task'")
+        task_exists = self.__cursor.fetchone()
+        if not task_exists:
+            self.__cursor.execute('''CREATE TABLE "Task" (
+                "Id"	INTEGER NOT NULL,
+                "Name"	INTEGER NOT NULL UNIQUE,
+                "Status"	TEXT NOT NULL,
+                "Deadline"	INTEGER,
+                "Priority"	INTEGER NOT NULL,
+                "Description"	TEXT,
+                "PersonId"	INTEGER,
+                PRIMARY KEY("Id")
+            )''')
+            self.__connection.commit()
 
     def getAllTasks(self):
         myQuery = "SELECT Id,Name,Status,Deadline,Priority,Description,PersonId FROM Task"
