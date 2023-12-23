@@ -96,7 +96,49 @@ class DatabaseManager:
         print("---------------------")
 
         df = pd.DataFrame(rijen,
-        columns=['ID', 'Name', 'Status', 'Deadline', 'Priority', 'Description', 'PersonName','PersonBirthday'])
+        columns=['TaskID', 'TaskName', 'TaskStatus', 'Deadline', 'Priority', 'Description', 'PersonName','PersonBirthday'])
+
+        df = df.fillna('None')
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.max_rows', None)
+        print(df.to_string(index=False))
+
+
+    def getAllTasksFromAllPeople(self):
+
+        myQuery = "SELECT Person.Name, Person.Birthday, Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description FROM Person LEFT JOIN Task ON Task.PersonId = Person.Id;"
+
+        self.__cursor.execute(myQuery)
+
+        rijen = self.__cursor.fetchall()
+
+        print("---------------------")
+        print("ALLE TAKEN")
+        print("---------------------")
+
+        df = pd.DataFrame(rijen,
+        columns=['PersonName','PersonBirthday','TaskID', 'TaskName', 'Status', 'Deadline', 'Priority', 'Description' ])
+
+        df = df.fillna('None')
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.max_rows', None)
+        print(df.to_string(index=False))
+
+    def getAllTasksFromPerson(self, id):
+
+        myQuery = "SELECT Person.Name, Person.Birthday, Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description FROM Person LEFT JOIN Task ON Task.PersonId = Person.Id WHERE Person.Id = ?;"
+
+        self.__cursor.execute(myQuery,(id,))
+
+        rijen = self.__cursor.fetchall()
+
+        print("---------------------")
+        print("ALLE TAKEN")
+        print("---------------------")
+
+        df = pd.DataFrame(rijen,
+                          columns=['PersonName', 'PersonBirthday', 'TaskID', 'TaskName', 'Status', 'Deadline',
+                                   'Priority', 'Description'])
 
         df = df.fillna('None')
         pd.set_option('display.max_columns', None)
@@ -121,7 +163,7 @@ class DatabaseManager:
 
     def getAllTasksTodo(self):
 
-        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status = 'TODO';"
+        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status = 'TODO' ORDER BY CONVERT(Task.Deadline, DATE) ASC;;"
 
         self.__cursor.execute(myQuery)
 
@@ -141,7 +183,7 @@ class DatabaseManager:
 
     def getAllTasksProgress(self):
 
-        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status = 'IN_PROGRESS';"
+        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status = 'IN_PROGRESS' ORDER BY CONVERT(Task.Deadline, DATE) ASC;;"
 
         self.__cursor.execute(myQuery)
 
@@ -160,7 +202,7 @@ class DatabaseManager:
         print(df.to_string(index=False))
 
     def getAllTasksFinished(self):
-        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status = 'FINISHED';"
+        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status = 'FINISHED' ORDER BY CONVERT(Task.Deadline, DATE) ASC;;"
 
         self.__cursor.execute(myQuery)
 
@@ -179,7 +221,7 @@ class DatabaseManager:
         print(df.to_string(index=False))
 
     def getAllTasksNotFinished(self):
-        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status != 'FINISHED';"
+        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status != 'FINISHED' ORDER BY CONVERT(Task.Deadline, DATE) ASC;;"
 
         self.__cursor.execute(myQuery)
 

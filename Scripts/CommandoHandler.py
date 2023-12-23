@@ -13,7 +13,7 @@ class CommandoHandler:
         self.__remove = ["TASK", "PERSON"]
         self.__update = ["TASK"]
         self.__updateTask = ["STATUS", "DEADLINE", "PRIORITY", "PERSON"]
-        self.__get = ["ALLTASK", "ALLPERSON","TASKWITHPERSON","PERSONTASKCOUNT","TASKTODO","TASKINPROGRESS","TASKFINISHED","TASKNOTFINISHED"]
+        self.__get = ["ALLTASK", "ALLPERSON","TASKWITHPERSON","PERSONTASKCOUNT","TASKTODO","TASKINPROGRESS","TASKFINISHED","TASKNOTFINISHED","TASKFROMALLPEOPLE","TASKFROMPERSON"]
         self.__dbManager = DatabaseManager()
 
     def inputCommand(self, command):
@@ -110,8 +110,7 @@ class CommandoHandler:
 
             print("Toevoegen persoon gelukt\n")
         else:
-            # terug naar het hoofdmenu gaat automatisch
-            print("Back To Main \n")
+            self.backToMainWrongSecondArgument()
 
     def removeCommand(self, commandlist):
         # TASK
@@ -125,6 +124,8 @@ class CommandoHandler:
             print("\nPersoon verwijderen ...\n")
             id = self.getIdFromPersonToUpdate()
             self.__dbManager.removePerson(id)
+        else:
+            self.backToMainWrongSecondArgument()
 
     def updateCommand(self, commandlist):
         # TASK
@@ -137,11 +138,9 @@ class CommandoHandler:
                 commandlist.append(input("Wat wil je updaten " + options +  "\n").upper())
             self.updateTaskCommand(commandlist);
         else:
-            print("")
-            # Ruimte voor uitbreidbaarheid
+            self.backToMainWrongSecondArgument()
 
     def getIdFromTaskToUpdate(self):
-        print("\n------------------\nALLE TAKEN\n------------------")
         self.__dbManager.getAllTasks()
         print("\n------------------\nAANPASSEN VAN TASK\n------------------")
         id = input("Geef het id van de taak die je wil aanpassen:\n")
@@ -187,6 +186,8 @@ class CommandoHandler:
             personId = self.getIdFromPersonToUpdate()
 
             self.__dbManager.updateTaskPerson(taskId, personId)
+        else:
+            self.backToMainWrongSecondArgument()
 
 
 
@@ -225,3 +226,26 @@ class CommandoHandler:
         elif commandlist[1] == self.__get[7]:
             self.__dbManager.getAllTasksNotFinished()
             print("\n")
+
+        # TASKSFROMALLPEOPLE
+        elif commandlist[1] == self.__get[8]:
+            self.__dbManager.getAllTasksFromAllPeople()
+            print("\n")
+        # TASKSFROMPERSON
+        elif commandlist[1] == self.__get[9]:
+            self.__dbManager.getAllPeople();
+            print("\n")
+            id = -1
+            while(not self.__dbManager.doesTaskExist(id)):
+                id = input("Geef het ID van de persoon waarvan je de taken wilt zien:\n");
+
+
+            self.__dbManager.getAllTasksFromPerson(id)
+            print("\n")
+        else:
+            self.backToMainWrongSecondArgument()
+
+    def backToMainWrongSecondArgument(self):
+        # terug naar het hoofdmenu gaat automatisch
+
+        print("\nVerkeerde Tweede Argument\nBack To Main ... \n")
