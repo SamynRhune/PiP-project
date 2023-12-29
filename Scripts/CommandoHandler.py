@@ -176,7 +176,10 @@ class CommandoHandler:
         elif commandlist[2] == self.__updateTask[2]:
             print("\nPriority updaten ...\n")
             id = self.getIdFromTaskToUpdate()
-            deadline = input("Geef een prioriteit van 0 tot 10\n")
+            deadline = -1
+            while not (10 < deadline < 0):
+                deadline = int(input("Geef een prioriteit van 0 tot 10\n"))
+
             self.__dbManager.updateTaskPriority(id, deadline)
 
         #Person

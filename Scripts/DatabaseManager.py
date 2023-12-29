@@ -163,7 +163,7 @@ class DatabaseManager:
 
     def getAllTasksTodo(self):
 
-        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status = 'TODO' ORDER BY CONVERT(Task.Deadline, DATE) ASC;;"
+        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status = 'TODO' ORDER BY SUBSTRING(Task.Deadline, 7, 4) || '-' || SUBSTRING(Task.Deadline, 4, 2) || '-' || SUBSTRING(Task.Deadline, 1, 2) ASC;"
 
         self.__cursor.execute(myQuery)
 
@@ -183,7 +183,7 @@ class DatabaseManager:
 
     def getAllTasksProgress(self):
 
-        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status = 'IN_PROGRESS' ORDER BY CONVERT(Task.Deadline, DATE) ASC;;"
+        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status = 'IN_PROGRESS' ORDER BY SUBSTRING(Task.Deadline, 7, 4) || '-' || SUBSTRING(Task.Deadline, 4, 2) || '-' || SUBSTRING(Task.Deadline, 1, 2) ASC;"
 
         self.__cursor.execute(myQuery)
 
@@ -202,7 +202,7 @@ class DatabaseManager:
         print(df.to_string(index=False))
 
     def getAllTasksFinished(self):
-        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status = 'FINISHED' ORDER BY CONVERT(Task.Deadline, DATE) ASC;;"
+        myQuery = "SELECT Task.Id, Task.Name, Task.Status, Task.Deadline, Task.Priority, Task.Description, PersonId FROM Task LEFT JOIN Person ON Task.PersonId = Person.Id WHERE Task.Status = 'FINISHED' ORDER BY SUBSTRING(Task.Deadline, 7, 4) || '-' || SUBSTRING(Task.Deadline, 4, 2) || '-' || SUBSTRING(Task.Deadline, 1, 2) ASC;"
 
         self.__cursor.execute(myQuery)
 
@@ -322,7 +322,7 @@ class DatabaseManager:
                 taak = Task(dbtaak[1], dbtaak[2], dbtaak[3], dbtaak[4], dbtaak[5])
 
             taak.set_next_status()
-            print(taak.get_status())
+            #print(taak.get_status())
 
             myQuery = "UPDATE Task SET Status = ? WHERE Id = ?;"
             self.__cursor.execute(myQuery, (taak.get_status().name, id))
@@ -331,7 +331,6 @@ class DatabaseManager:
     def updateTaskPriority(self, id, new_priority):
         if self.doesTaskExist(id):
             dbtask = self.getTaskById(id)
-            task = Task(dbtask[1], dbtask[2], dbtask[3], dbtask[4], dbtask[5])
 
             myQuery = "UPDATE Task SET Priority=? WHERE Id=?;"
             task_data = (new_priority, id)
